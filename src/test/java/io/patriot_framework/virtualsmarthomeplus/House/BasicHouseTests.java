@@ -1,15 +1,15 @@
-package patriot.virtualsmarthomeplus.House;
+package io.patriot_framework.virtualsmarthomeplus.House;
 
+import io.patriot_framework.virtualsmarthomeplus.InitialApplication;
+import io.patriot_framework.virtualsmarthomeplus.house.Fireplace;
+import io.patriot_framework.virtualsmarthomeplus.house.House;
+import io.patriot_framework.virtualsmarthomeplus.house.devices.Device;
 import org.apache.camel.test.spring.CamelSpringBootRunner;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
-import patriot.virtualsmarthomeplus.InitialApplication;
-import patriot.virtualsmarthomeplus.house.Fireplace;
-import patriot.virtualsmarthomeplus.house.House;
-import patriot.virtualsmarthomeplus.house.devices.Device;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -19,22 +19,22 @@ import static org.hamcrest.MatcherAssert.assertThat;
 @RunWith(CamelSpringBootRunner.class)
 @SpringBootTest(classes = InitialApplication.class)
 public class BasicHouseTests {
+
     House house = new House("test-house");
     Map<String, Device> devices = new ConcurrentHashMap<>();
     Fireplace fireplace = new Fireplace("fireplace");
+    Fireplace fireplace2 = new Fireplace("fireplace2");
 
     @Test
     public void houseNameTests() {
         assertThat(house.getHouseName(), equalTo("test-house"));
         house.setHouseName("new-house");
         assertThat(house.getHouseName(), equalTo("new-house"));
-
     }
 
     @Test
     public void addDevice() {
-        devices.put("fireplace", fireplace);
-        house.setDevices(devices);
+        house.addDevice("fireplace", fireplace);
         assertThat(house.getDevice("fireplace"), equalTo(fireplace));
     }
 
@@ -46,4 +46,21 @@ public class BasicHouseTests {
         assertThat(house.getDevice("fireplace"), equalTo(null));
     }
 
+    @Test
+    public void setDevices() {
+        devices.put("fireplace", fireplace);
+        devices.put("fireplace2", fireplace2);
+        house.setDevices(devices);
+        assertThat(house.getDevice("fireplace"), equalTo(fireplace));
+        assertThat(house.getDevice("fireplace2"), equalTo(fireplace2));
+    }
+
+    @Test
+    public void getAllDevices() {
+        devices.put("fireplace", fireplace);
+        devices.put("fireplace2", fireplace2);
+        house.setDevices(devices);
+        ArrayList<Device> expectedList = new ArrayList<Device>(devices.values());
+        assertThat(house.getAllDevices(Fireplace.class), equalTo(expectedList));
+    }
 }

@@ -1,6 +1,6 @@
-package patriot.virtualsmarthomeplus.house;
+package io.patriot_framework.virtualsmarthomeplus.house;
 
-import patriot.virtualsmarthomeplus.house.devices.Actuator;
+import io.patriot_framework.virtualsmarthomeplus.house.devices.Actuator;
 
 public class Fireplace extends Actuator {
 
@@ -15,5 +15,4 @@ public class Fireplace extends Actuator {
     public void extinguish() {
         this.switchIt(false);
     }
-
 }

@@ -1,4 +1,4 @@
-package patriot.virtualsmarthomeplus.routes;
+package io.patriot_framework.virtualsmarthomeplus.routes;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -26,7 +26,5 @@ public class FireplaceRoute extends RouteBuilder {
                     }
                 })
                 .endRest();
-
     }
-
 }

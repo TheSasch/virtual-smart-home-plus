@@ -1,15 +1,16 @@
-package patriot.virtualsmarthomeplus.house;
+package io.patriot_framework.virtualsmarthomeplus.house;
 
-import patriot.virtualsmarthomeplus.house.devices.Device;
+import io.patriot_framework.virtualsmarthomeplus.house.devices.Device;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class House {
 
     private String houseName;
-    private Map<String, Device> devices;
+    private Map<String, Device> devices = new ConcurrentHashMap<>();
 
     public House(String houseName) {
         this.houseName = houseName;
@@ -49,6 +50,4 @@ public final class House {
         }
         return toReturn;
     }
-
-
 }

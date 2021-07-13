@@ -1,6 +1,7 @@
-package patriot.virtualsmarthomeplus.house;
+package io.patriot_framework.virtualsmarthomeplus.house;
 
 public class HouseBean {
+
     private House house;
 
     private HouseBean(House house) {
@@ -10,5 +11,4 @@ public class HouseBean {
     public void fireplaceOn() {
         ((Fireplace) (house.getDevice("fireplace"))).fireUp();
     }
-
 }

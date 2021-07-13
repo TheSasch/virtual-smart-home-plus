@@ -1,4 +1,4 @@
-package patriot.virtualsmarthomeplus;
+package io.patriot_framework.virtualsmarthomeplus;
 
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -55,5 +55,4 @@ class JSONTests {
                 .when().get("http://localhost:8080/fireplace")
                 .then().statusCode(200).time(lessThan(1000L));
     }
-
 }

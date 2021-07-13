@@ -1,4 +1,4 @@
-package patriot.virtualsmarthomeplus.house.devices;
+package io.patriot_framework.virtualsmarthomeplus.house.devices;
 
 public abstract class Device {
 
@@ -11,5 +11,4 @@ public abstract class Device {
     public String getLabel() {
         return label;
     }
-
 }
