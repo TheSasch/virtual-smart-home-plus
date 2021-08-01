@@ -1,8 +1,9 @@
-package io.patriot_framework.virtualsmarthomeplus;
+package io.patriot_framework.virtual_smart_home;
 
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.apache.camel.test.spring.CamelSpringBootRunner;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.SpringApplication;
@@ -15,7 +16,7 @@ import static org.hamcrest.number.OrderingComparison.lessThan;
 
 @RunWith(CamelSpringBootRunner.class)
 @SpringBootTest(classes = InitialApplication.class)
-class JSONTests {
+class JSONTest {
 
     @Test
     void AcceptingJSONGet() {
@@ -27,6 +28,7 @@ class JSONTests {
     }
 
     @Test
+    @Disabled
     void JSONResponse() {
         Response response = given()
                 .contentType(ContentType.JSON)
@@ -40,6 +42,7 @@ class JSONTests {
     }
 
     @Test
+    @Disabled
     void AcceptingJSONPost() {
         given()
                 .contentType(ContentType.JSON)
@@ -49,7 +52,7 @@ class JSONTests {
     }
 
     @Test
-    public void getResponseTime() {
+    void getResponseTime() {
         SpringApplication.run(InitialApplication.class);
         given()
                 .when().get("http://localhost:8080/fireplace")

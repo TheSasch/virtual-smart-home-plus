@@ -1,9 +1,8 @@
-package io.patriot_framework.virtualsmarthomeplus.House;
+package io.patriot_framework.virtual_smart_home.house;
 
-import io.patriot_framework.virtualsmarthomeplus.InitialApplication;
-import io.patriot_framework.virtualsmarthomeplus.house.Fireplace;
-import io.patriot_framework.virtualsmarthomeplus.house.House;
-import io.patriot_framework.virtualsmarthomeplus.house.devices.Device;
+import io.patriot_framework.virtual_smart_home.InitialApplication;
+import io.patriot_framework.virtual_smart_home.house.device.Device;
+import io.patriot_framework.virtual_smart_home.house.device.Fireplace;
 import org.apache.camel.test.spring.CamelSpringBootRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,19 +17,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 @RunWith(CamelSpringBootRunner.class)
 @SpringBootTest(classes = InitialApplication.class)
-public class BasicHouseTests {
+public class HouseTest {
 
-    House house = new House("test-house");
+    House house = new House("house");
     Map<String, Device> devices = new ConcurrentHashMap<>();
     Fireplace fireplace = new Fireplace("fireplace");
     Fireplace fireplace2 = new Fireplace("fireplace2");
-
-    @Test
-    public void houseNameTests() {
-        assertThat(house.getHouseName(), equalTo("test-house"));
-        house.setHouseName("new-house");
-        assertThat(house.getHouseName(), equalTo("new-house"));
-    }
 
     @Test
     public void addDevice() {
@@ -56,11 +48,11 @@ public class BasicHouseTests {
     }
 
     @Test
-    public void getAllDevices() {
+    public void getDevicesOfType() {
         devices.put("fireplace", fireplace);
         devices.put("fireplace2", fireplace2);
         house.setDevices(devices);
-        ArrayList<Device> expectedList = new ArrayList<Device>(devices.values());
-        assertThat(house.getAllDevices(Fireplace.class), equalTo(expectedList));
+        ArrayList<Device> expectedList = new ArrayList<>(devices.values());
+        assertThat(house.getDevicesOfType(Fireplace.class), equalTo(expectedList));
     }
 }

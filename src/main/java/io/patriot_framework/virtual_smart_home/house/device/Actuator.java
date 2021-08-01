@@ -1,4 +1,4 @@
-package io.patriot_framework.virtualsmarthomeplus.house.devices;
+package io.patriot_framework.virtual_smart_home.house.device;
 
 public class Actuator extends Device implements Switchable {
 
@@ -9,8 +9,8 @@ public class Actuator extends Device implements Switchable {
     }
 
     @Override
-    public void switchIt(boolean on) {
-        enabled = on;
+    public void switchIt(boolean enable) {
+        enabled = enable;
     }
 
     @Override
