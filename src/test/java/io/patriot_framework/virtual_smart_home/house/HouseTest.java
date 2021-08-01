@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -52,7 +52,7 @@ public class HouseTest {
         devices.put("fireplace", fireplace);
         devices.put("fireplace2", fireplace2);
         house.setDevices(devices);
-        ArrayList<Device> expectedList = new ArrayList<>(devices.values());
-        assertThat(house.getDevicesOfType(Fireplace.class), equalTo(expectedList));
+        Map<String, Device> expected = new HashMap<>(devices);
+        assertThat(house.getDevicesOfType(Fireplace.class), equalTo(expected));
     }
 }

@@ -1,30 +1,164 @@
 package io.patriot_framework.virtual_smart_home.route;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+import io.patriot_framework.virtual_smart_home.house.device.Device;
+import io.patriot_framework.virtual_smart_home.house.device.Fireplace;
 import org.apache.camel.Exchange;
-import org.apache.camel.Processor;
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.model.rest.RestBindingMode;
+import org.apache.catalina.connector.Response;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FireplaceRoute extends RouteBuilder {
+public class FireplaceRoute extends DeviceRoute {
 
     @Override
     public void configure() throws Exception {
-        restConfiguration().component("servlet")
-                .host("localhost").port(8080)
-                .bindingMode(RestBindingMode.auto);
+        rest(getRoute())
+                .get("{label}")
+                    .produces("application/json")
+                    .to("direct:readFireplace")
 
-        rest("/fireplace")
-                .get("/")
-                .produces("application/json")
-                .route().routeId("fireplace-route")
-                .process(new Processor() {
-                    @Override
-                    public void process(Exchange exchange) throws Exception {
-                        exchange.getMessage().setBody("{\"label\": \"fireplace\"}");
+                .get()
+                    .produces("application/json")
+                    .to("direct:readFireplaces")
+
+                .post()
+                    .type(FireplaceModel.class)
+                    .consumes("application/json")
+                    .to("direct:createFireplace")
+
+                .put()
+                    .type(FireplaceModel.class)
+                    .consumes("application/json")
+                    .to("direct:updateFireplace")
+
+                .patch()
+                    .type(FireplaceModel.class)
+                    .consumes("application/json")
+                    .to("direct:updateFireplace")
+
+                .delete()
+                    .to("direct:deleteFireplace");
+
+        onException(UnrecognizedPropertyException.class)
+                .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(Response.SC_BAD_REQUEST))
+                .handled(true);
+
+        onException(JsonParseException.class)
+                .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(Response.SC_BAD_REQUEST))
+                .handled(true);
+
+        handleGet();
+        handlePost();
+        handlePut();
+        handleDelete();
+    }
+
+    private void handleGet() {
+        from("direct:readFireplace")
+                .routeId("read-fireplace-route")
+                .process(exchange -> {
+                    String label = exchange.getMessage().getHeader("label").toString();
+                    Device fireplace = house.getDevicesOfType(Fireplace.class).get(label);
+                    exchange.getMessage().setBody(fireplace);
+
+                    if (fireplace == null) {
+                        exchange.getMessage().setHeader(Exchange.HTTP_RESPONSE_CODE, Response.SC_NOT_FOUND); // 404
                     }
                 })
                 .endRest();
+
+        from("direct:readFireplaces")
+                .routeId("read-fireplaces-route")
+                .process(exchange -> exchange.getMessage().setBody(house.getDevicesOfType(Fireplace.class).values()))
+                .endRest();
+    }
+
+    private void handlePost() {
+        from("direct:createFireplace")
+                .routeId("create-fireplace-route")
+                .choice()
+                    .when(body().isNotNull())
+                        .process(exchange -> {
+                            FireplaceModel fireplaceModel = exchange.getMessage().getBody(FireplaceModel.class);
+                            Device fireplace = house.getDevicesOfType(Fireplace.class).get(fireplaceModel.getLabel());
+
+                            if (fireplace != null) {
+                                exchange.getMessage().setHeader(Exchange.HTTP_RESPONSE_CODE, Response.SC_CONFLICT);
+                                // 409
+                                return;
+                            }
+                            exchange.getMessage().setHeader(Exchange.HTTP_RESPONSE_CODE, Response.SC_CREATED); // 201
+                            house.addDevice(fireplaceModel.getLabel(), fireplaceModel.toFireplace());
+                            exchange.getMessage().setHeader("label", fireplaceModel.getLabel());
+                        })
+                        .setBody(body()) // Respond with request body.
+                        .choice()
+                            .when(simple("${header.CamelHttpResponseCode} != 409"))
+                                .log("Created fireplace \"${header.label}\"")
+                        .endChoice()
+                    .otherwise()
+                        .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(Response.SC_BAD_REQUEST)) // 400
+                .endChoice()
+                .endRest();
+    }
+
+    private void handlePut() {
+        from("direct:updateFireplace")
+                .routeId("update-fireplace-route")
+                .choice()
+                    .when(body().isNotNull())
+                        .process(exchange -> {
+                            FireplaceModel fireplaceModel = exchange.getMessage().getBody(FireplaceModel.class);
+                            Device fireplace = house.getDevicesOfType(Fireplace.class).get(fireplaceModel.getLabel());
+
+                            if (fireplace == null) {
+                                exchange.getMessage().setHeader(Exchange.HTTP_RESPONSE_CODE, Response.SC_NOT_FOUND);
+                                // 404
+                                return;
+                            }
+                            house.updateDevice(fireplaceModel.getLabel(), fireplaceModel.toFireplace());
+                            exchange.getMessage().setHeader("label", fireplaceModel.getLabel());
+                        })
+                        .setBody(body()) // Respond with request body.
+                        .choice()
+                            .when(simple("${header.CamelHttpResponseCode} != 404"))
+                                .log("Updated fireplace \"${header.label}\"")
+                        .endChoice()
+                    .otherwise()
+                        .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(Response.SC_BAD_REQUEST)) // 400
+                .endChoice()
+                .endRest();
+    }
+
+    private void handleDelete() {
+        from("direct:deleteFireplace")
+                .routeId("delete-fireplace-route")
+                .choice()
+                    .when(header("label").isNotNull())
+                        .process(exchange -> {
+                            String label = exchange.getMessage().getHeader("label").toString();
+                            Device fireplace = house.getDevicesOfType(Fireplace.class).get(label);
+
+                            if (fireplace == null) {
+                                exchange.getMessage().setHeader(Exchange.HTTP_RESPONSE_CODE, Response.SC_NOT_FOUND);
+                                // 404
+                                return;
+                            }
+                            house.removeDevice(exchange.getMessage().getHeader("label").toString());
+                        })
+                        .choice()
+                            .when(simple("${header.CamelHttpResponseCode} != 404"))
+                                .log("Removed fireplace \"${header.label}\"")
+                        .endChoice()
+                    .otherwise()
+                        .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(Response.SC_BAD_REQUEST)) // 400
+                .endChoice()
+                .endRest();
+    }
+
+    @Override
+    protected String getRoute() {
+        return super.getRoute() + "fireplace/";
     }
 }

@@ -2,6 +2,7 @@ package io.patriot_framework.virtual_smart_home.house;
 
 import io.patriot_framework.virtual_smart_home.house.device.Device;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,26 +25,33 @@ public final class House {
         return devices.get(label);
     }
 
-    public void removeDevice(String label){
+    public void updateDevice(String label, Device device) {
+        devices.put(label, device);
+    }
+
+    public void removeDevice(String label) {
         devices.remove(label);
     }
 
-    public void setDevices(Map<String, Device> devices) {
-        this.devices = devices;
-    }
-
-    public <T> List<T> getDevicesOfType(Class<T> type) {
-        return devices.values().stream()
-                .filter(type::isInstance)
-                .map(type::cast)
-                .collect(Collectors.toList());
+    public Map<String, Device> getDevicesOfType(Class<? extends Device> type) {
+        return devices.entrySet().stream()
+                .filter(entry -> type.isInstance(entry.getValue()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public String getHouseName() {
         return houseName;
     }
 
-    public void setHouseName(String houseName) {
+    public void setHouseName(String houseName) { // TODO: Remove?
         this.houseName = houseName;
+    }
+
+    public Map<String, Device> getDevices() {
+        return Collections.unmodifiableMap(devices);
+    }
+
+    public void setDevices(Map<String, Device> devices) { // TODO: ?
+        this.devices = devices;
     }
 }
