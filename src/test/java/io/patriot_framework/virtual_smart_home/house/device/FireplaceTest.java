@@ -11,13 +11,13 @@ public class FireplaceTest {
 
     @Test
     public void fireUp() {
-        fireplace.fireUp();
+        fireplace.setEnabled(true);
         assertThat(fireplace.isEnabled(), equalTo(true));
     }
 
     @Test
     public void extinguish() {
-        fireplace.extinguish();
+        fireplace.setEnabled(false);
         assertThat(fireplace.isEnabled(), equalTo(false));
     }
 }

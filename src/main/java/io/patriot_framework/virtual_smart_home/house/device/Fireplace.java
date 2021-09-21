@@ -1,16 +1,10 @@
 package io.patriot_framework.virtual_smart_home.house.device;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public final class Fireplace extends Actuator {
 
-    public Fireplace(String label) {
+    public Fireplace(@JsonProperty("label") String label) {
         super(label);
-    }
-
-    public void fireUp() {
-        this.switchIt(true);
-    }
-
-    public void extinguish() {
-        this.switchIt(false);
     }
 }

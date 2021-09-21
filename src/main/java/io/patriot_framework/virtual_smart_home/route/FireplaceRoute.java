@@ -23,17 +23,17 @@ public class FireplaceRoute extends DeviceRoute {
                     .to("direct:readFireplaces")
 
                 .post()
-                    .type(FireplaceModel.class)
+                    .type(Fireplace.class)
                     .consumes("application/json")
                     .to("direct:createFireplace")
 
                 .put()
-                    .type(FireplaceModel.class)
+                    .type(Fireplace.class)
                     .consumes("application/json")
                     .to("direct:updateFireplace")
 
                 .patch()
-                    .type(FireplaceModel.class)
+                    .type(Fireplace.class)
                     .consumes("application/json")
                     .to("direct:updateFireplace")
 
@@ -80,17 +80,17 @@ public class FireplaceRoute extends DeviceRoute {
                 .choice()
                     .when(body().isNotNull())
                         .process(exchange -> {
-                            FireplaceModel fireplaceModel = exchange.getMessage().getBody(FireplaceModel.class);
-                            Device fireplace = house.getDevicesOfType(Fireplace.class).get(fireplaceModel.getLabel());
+                            Fireplace fireplace = exchange.getMessage().getBody(Fireplace.class);
+                            Device currentFireplace = house.getDevicesOfType(Fireplace.class).get(fireplace.getLabel());
 
-                            if (fireplace != null) {
+                            if (currentFireplace != null) {
                                 exchange.getMessage().setHeader(Exchange.HTTP_RESPONSE_CODE, Response.SC_CONFLICT);
                                 // 409
                                 return;
                             }
                             exchange.getMessage().setHeader(Exchange.HTTP_RESPONSE_CODE, Response.SC_CREATED); // 201
-                            house.addDevice(fireplaceModel.getLabel(), fireplaceModel.toFireplace());
-                            exchange.getMessage().setHeader("label", fireplaceModel.getLabel());
+                            house.addDevice(fireplace.getLabel(), fireplace);
+                            exchange.getMessage().setHeader("label", fireplace.getLabel());
                         })
                         .setBody(body()) // Respond with request body.
                         .choice()
@@ -109,16 +109,16 @@ public class FireplaceRoute extends DeviceRoute {
                 .choice()
                     .when(body().isNotNull())
                         .process(exchange -> {
-                            FireplaceModel fireplaceModel = exchange.getMessage().getBody(FireplaceModel.class);
-                            Device fireplace = house.getDevicesOfType(Fireplace.class).get(fireplaceModel.getLabel());
+                            Fireplace fireplace = exchange.getMessage().getBody(Fireplace.class);
+                            Device currentFireplace = house.getDevicesOfType(Fireplace.class).get(fireplace.getLabel());
 
-                            if (fireplace == null) {
+                            if (currentFireplace == null) {
                                 exchange.getMessage().setHeader(Exchange.HTTP_RESPONSE_CODE, Response.SC_NOT_FOUND);
                                 // 404
                                 return;
                             }
-                            house.updateDevice(fireplaceModel.getLabel(), fireplaceModel.toFireplace());
-                            exchange.getMessage().setHeader("label", fireplaceModel.getLabel());
+                            house.updateDevice(fireplace.getLabel(), fireplace);
+                            exchange.getMessage().setHeader("label", fireplace.getLabel());
                         })
                         .setBody(body()) // Respond with request body.
                         .choice()
